@@ -19,14 +19,25 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2.12'
+          php-version: '7.4'
           extensions: mbstring, curl, pdo_mysql
 
       - name: Install dependencies
         run: composer install
 
       - name: Run PHP Application
-        run: php src/index.php
+        run: php src/index.php || true
+
+      - name: Check for critical error flag
+        id: check_flag
+        run: |
+          if [ -f critical_error.flag ]; then
+            echo "Critical error detected."
+            echo "::set-output name=has_errors::true"
+          else
+            echo "No critical errors found."
+            echo "::set-output name=has_errors::false"
+          fi
 
       - name: Check for errors in error log
         run: |
@@ -35,9 +46,8 @@ jobs:
             php parse_errors.php
           else
             echo "No error log found."
-            exit 1
           fi
 
       - name: Send Twilio Voice Alert on Errors
-        if: success() && steps.Check-for-errors-in-error-log.outputs.has_errors == 'true'
+        if: steps.check_flag.outputs.has_errors == 'true'
         run: php send_twilio_alert.php

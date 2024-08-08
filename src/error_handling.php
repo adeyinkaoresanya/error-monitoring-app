@@ -7,7 +7,7 @@ function customErrorHandler($errno, $errstr, $errfile, $errline) {
     error_log($log, 3, __DIR__ . '/../error.log');
     // Optionally, you can halt the script for critical errors:
     if ($errno == E_USER_ERROR) {
-        exit(1);
+        file_put_contents(__DIR__ . '/../critical_error.flag', 'true');
     }
 }
 
