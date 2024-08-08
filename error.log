@@ -1,0 +1,1 @@
+[2024-08-08 10:46:06] Error: [256] Database Connection Failed: SQLSTATE[HY000] [2002] No connection could be made because the target machine actively refused it in C:\xampp\htdocs\error-monitoring-app\src\database.php on line 17

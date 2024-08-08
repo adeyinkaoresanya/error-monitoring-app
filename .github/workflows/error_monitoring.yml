@@ -1,0 +1,43 @@
+name: Automated Error Monitoring and Alerts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  error-monitoring:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2.12'
+          extensions: mbstring, curl, pdo_mysql
+
+      - name: Install dependencies
+        run: composer install
+
+      - name: Run PHP Application
+        run: php src/index.php
+
+      - name: Check for errors in error log
+        run: |
+          if [ -f error.log ]; then
+            echo "Error log found, proceeding to parse."
+            php parse_errors.php
+          else
+            echo "No error log found."
+            exit 1
+          fi
+
+      - name: Send Twilio Voice Alert on Errors
+        if: success() && steps.Check-for-errors-in-error-log.outputs.has_errors == 'true'
+        run: php send_twilio_alert.php
